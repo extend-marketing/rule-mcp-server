@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rule MCP Server — Installation Guide</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --code-bg: #111318;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+      background: linear-gradient(180deg, #1a1d27 0%, var(--bg) 100%);
+    }
+
+    header .badge {
+      display: inline-block;
+      background: rgba(99,102,241,.15);
+      color: var(--accent-light);
+      border: 1px solid rgba(99,102,241,.3);
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      padding: .25rem .75rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #e2e8f0, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--muted);
+      margin-top: .5rem;
+      font-size: 1.05rem;
+    }
+
+    main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 2.5rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    h2 .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    p { color: var(--muted); margin-bottom: .75rem; }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-size: .875rem;
+      line-height: 1.6;
+      margin: .75rem 0;
+      position: relative;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      color: #c4b5fd;
+    }
+
+    pre code { color: #e2e8f0; }
+
+    .copy-btn {
+      position: absolute;
+      top: .6rem;
+      right: .6rem;
+      background: var(--border);
+      border: none;
+      border-radius: 5px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .7rem;
+      font-family: inherit;
+      padding: .2rem .55rem;
+      transition: background .15s, color .15s;
+    }
+    .copy-btn:hover { background: var(--accent); color: #fff; }
+    .copy-btn.copied { background: var(--green); color: #fff; }
+
+    .callout {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      background: rgba(245,158,11,.07);
+      border: 1px solid rgba(245,158,11,.25);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .callout .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: .05rem; }
+    .callout p { margin: 0; color: #fcd34d; font-size: .9rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+      margin: .75rem 0;
+    }
+
+    th {
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: .5rem .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: .6rem .75rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: top;
+    }
+
+    td:first-child { color: var(--text); font-family: monospace; font-size: .85rem; }
+
+    .tag {
+      display: inline-block;
+      background: rgba(34,197,94,.1);
+      color: var(--green);
+      border-radius: 4px;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .1rem .4rem;
+      margin-left: .4rem;
+    }
+
+    .clients {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .client-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+
+    .client-card:hover, .client-card.active {
+      border-color: var(--accent);
+    }
+
+    .client-card h3 { font-size: .95rem; margin-bottom: .25rem; }
+    .client-card p { font-size: .82rem; margin: 0; }
+
+    .client-config { display: none; }
+    .client-config.visible { display: block; }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">MCP Server</div>
+  <h1>Rule MCP Server</h1>
+  <p>Connect Claude and other AI clients to Rule — the marketing automation platform for email &amp; SMS.</p>
+</header>
+
+<main>
+
+  <!-- Prerequisites -->
+  <h2><span class="step-num">1</span> Prerequisites</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Requirement</th><th>Details</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Node.js</td>
+          <td>Version 18 or later — <a href="https://nodejs.org" target="_blank">nodejs.org</a></td>
+        </tr>
+        <tr>
+          <td>Rule API Key</td>
+          <td>Found in your Rule account under Settings → API</td>
+        </tr>
+        <tr>
+          <td>MCP-compatible client</td>
+          <td>Claude Desktop, Claude Code, Cursor, or any MCP client</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Clone / Install -->
+  <h2><span class="step-num">2</span> Install the server</h2>
+  <p>Clone the repository and install dependencies:</p>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>git clone https://github.com/your-org/rule-mcp-server.git
+cd rule-mcp-server
+npm install</code></pre>
+
+  <p>Note the absolute path to <code>index.js</code> — you will need it in the next step:</p>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>pwd
+# e.g. /Users/you/rule-mcp-server</code></pre>
+
+  <!-- Configure client -->
+  <h2><span class="step-num">3</span> Configure your MCP client</h2>
+  <p>Select your client below to see the matching configuration:</p>
+
+  <div class="clients">
+    <div class="client-card active" onclick="showClient('desktop')">
+      <h3>Claude Desktop</h3>
+      <p>macOS / Windows app</p>
+    </div>
+    <div class="client-card" onclick="showClient('code')">
+      <h3>Claude Code</h3>
+      <p>CLI / VS Code extension</p>
+    </div>
+    <div class="client-card" onclick="showClient('cursor')">
+      <h3>Cursor</h3>
+      <p>AI-native code editor</p>
+    </div>
+  </div>
+
+  <!-- Claude Desktop -->
+  <div id="cfg-desktop" class="client-config visible">
+    <p>Open (or create) <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> and add:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>{
+  "mcpServers": {
+    "rule": {
+      "command": "node",
+      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
+      "env": {
+        "RULE_API_KEY": "your-rule-api-key-here"
+      }
+    }
+  }
+}</code></pre>
+    <p>Restart Claude Desktop after saving. The Rule tools will appear in the tool picker.</p>
+  </div>
+
+  <!-- Claude Code -->
+  <div id="cfg-code" class="client-config">
+    <p>Run the following command to add the server to your Claude Code config:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>claude mcp add rule \
+  --command node \
+  --args "/absolute/path/to/rule-mcp-server/index.js" \
+  --env RULE_API_KEY=your-rule-api-key-here</code></pre>
+    <p>Or edit <code>~/.claude/settings.json</code> manually using the same JSON structure as the Claude Desktop config above.</p>
+  </div>
+
+  <!-- Cursor -->
+  <div id="cfg-cursor" class="client-config">
+    <p>Open <strong>Cursor Settings → MCP</strong> and add a new server entry:</p>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>{
+  "mcpServers": {
+    "rule": {
+      "command": "node",
+      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
+      "env": {
+        "RULE_API_KEY": "your-rule-api-key-here"
+      }
+    }
+  }
+}</code></pre>
+  </div>
+
+  <!-- API Key -->
+  <h2><span class="step-num">4</span> Set your API key</h2>
+  <p>Replace <code>your-rule-api-key-here</code> in the config above with your actual Rule API key.</p>
+
+  <div class="callout">
+    <span class="icon">&#9888;</span>
+    <p>Never commit your API key to version control. Use environment variables or a secrets manager instead.</p>
+  </div>
+
+  <p>Alternatively, export the key in your shell and reference it from the config:</p>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>export RULE_API_KEY="your-rule-api-key-here"</code></pre>
+
+  <!-- Verify -->
+  <h2><span class="step-num">5</span> Verify the installation</h2>
+  <p>Start the server manually to confirm it runs without errors:</p>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>RULE_API_KEY=your-rule-api-key-here node index.js</code></pre>
+  <p>You should see no output — the server waits for MCP messages over stdio. Press <kbd>Ctrl+C</kbd> to exit.</p>
+  <p>Inside your AI client, ask something like:</p>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>List my Rule subscribers</code></pre>
+
+  <hr />
+
+  <!-- Available tools -->
+  <h2>Available tools</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Tools</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Subscribers</td>
+          <td>Create, get, update, delete subscribers and their custom fields</td>
+        </tr>
+        <tr>
+          <td>Tags</td>
+          <td>Add, remove, and manage subscriber tags <span class="tag">segments</span></td>
+        </tr>
+        <tr>
+          <td>Campaigns</td>
+          <td>List, create, and retrieve campaign statistics</td>
+        </tr>
+        <tr>
+          <td>Transactions</td>
+          <td>Send transactional emails and SMS messages</td>
+        </tr>
+        <tr>
+          <td>Templates</td>
+          <td>List and retrieve email templates</td>
+        </tr>
+        <tr>
+          <td>Segments</td>
+          <td>List audience segments</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr />
+
+  <!-- Troubleshooting -->
+  <h2>Troubleshooting</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Problem</th><th>Solution</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Server not found</td>
+          <td>Check that the path in <code>args</code> is absolute and the file exists</td>
+        </tr>
+        <tr>
+          <td>401 Unauthorized</td>
+          <td>Verify your <code>RULE_API_KEY</code> is correct and active</td>
+        </tr>
+        <tr>
+          <td>Node not found</td>
+          <td>Ensure Node.js 18+ is installed and <code>node</code> is on your PATH</td>
+        </tr>
+        <tr>
+          <td>Tools not appearing</td>
+          <td>Restart your MCP client after updating the config file</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  Rule MCP Server &mdash; MIT License &mdash; Built by Extend Marketing
+</footer>
+
+<script>
+  function showClient(id) {
+    document.querySelectorAll('.client-config').forEach(el => el.classList.remove('visible'));
+    document.querySelectorAll('.client-card').forEach(el => el.classList.remove('active'));
+    document.getElementById('cfg-' + id).classList.add('visible');
+    event.currentTarget.classList.add('active');
+  }
+
+  function copyCode(btn) {
+    const code = btn.closest('pre').querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
