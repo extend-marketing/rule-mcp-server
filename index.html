@@ -317,10 +317,7 @@
   <!-- Claude Code -->
   <div id="cfg-code" class="client-config">
     <p>Run this command (replace <code>YOUR_RULE_API_KEY</code> with your key):</p>
-    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>claude mcp add rule \
-  --transport streamable-http \
-  --header "Authorization: Bearer YOUR_RULE_API_KEY" \
-  https://rule-mcp-server-production.up.railway.app/mcp</code></pre>
+    <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>claude mcp add --transport http rule https://rule-mcp-server-production.up.railway.app/mcp --header "Authorization: Bearer YOUR_RULE_API_KEY"</code></pre>
     <p>The Rule tools will be available immediately in your next Claude Code session.</p>
   </div>
 
