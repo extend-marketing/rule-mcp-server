@@ -247,43 +247,37 @@
 <main>
 
   <!-- Prerequisites -->
-  <h2><span class="step-num">1</span> Prerequisites</h2>
+  <h2><span class="step-num">1</span> Get your Rule API key</h2>
   <div class="card">
     <table>
       <thead>
-        <tr><th>Requirement</th><th>Details</th></tr>
+        <tr><th>Step</th><th>Details</th></tr>
       </thead>
       <tbody>
         <tr>
-          <td>Node.js</td>
-          <td>Version 18 or later — <a href="https://nodejs.org" target="_blank">nodejs.org</a></td>
+          <td>Log in</td>
+          <td><a href="https://app.rule.io" target="_blank">app.rule.io</a></td>
         </tr>
         <tr>
-          <td>Rule API Key</td>
-          <td>Found in your Rule account under Settings → API</td>
+          <td>Navigate</td>
+          <td>Settings → Developer → New API key</td>
         </tr>
         <tr>
-          <td>MCP-compatible client</td>
-          <td>Claude Desktop, Claude Code, Cursor, or any MCP client</td>
+          <td>Copy</td>
+          <td>Save the key securely — you will need it below</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Clone / Install -->
-  <h2><span class="step-num">2</span> Install the server</h2>
-  <p>Clone the repository and install dependencies:</p>
-  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>git clone https://github.com/your-org/rule-mcp-server.git
-cd rule-mcp-server
-npm install</code></pre>
-
-  <p>Note the absolute path to <code>index.js</code> — you will need it in the next step:</p>
-  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>pwd
-# e.g. /Users/you/rule-mcp-server</code></pre>
+  <div class="callout">
+    <span class="icon">&#9888;</span>
+    <p>Never share your API key or commit it to version control.</p>
+  </div>
 
   <!-- Configure client -->
-  <h2><span class="step-num">3</span> Configure your MCP client</h2>
-  <p>Select your client below to see the matching configuration:</p>
+  <h2><span class="step-num">2</span> Configure your MCP client</h2>
+  <p>The server is already running at <code>https://rule-mcp-server-production.up.railway.app/mcp</code> — no installation needed. Select your client below:</p>
 
   <div class="clients">
     <div class="client-card active" onclick="showClient('desktop')">
@@ -302,29 +296,32 @@ npm install</code></pre>
 
   <!-- Claude Desktop -->
   <div id="cfg-desktop" class="client-config visible">
-    <p>Open (or create) <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> and add:</p>
+    <p>Open (or create) your Claude Desktop config file:</p>
+    <p><strong>macOS:</strong> <code>~/Library/Application Support/Claude/claude_desktop_config.json</code><br>
+    <strong>Windows:</strong> <code>%APPDATA%\Claude\claude_desktop_config.json</code></p>
+    <p>Add the following:</p>
     <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>{
   "mcpServers": {
     "rule": {
-      "command": "node",
-      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
-      "env": {
-        "RULE_API_KEY": "your-rule-api-key-here"
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_RULE_API_KEY"
       }
     }
   }
 }</code></pre>
-    <p>Restart Claude Desktop after saving. The Rule tools will appear in the tool picker.</p>
+    <p>Replace <code>YOUR_RULE_API_KEY</code> with your key, then restart Claude Desktop. The Rule tools will appear in the tool picker.</p>
   </div>
 
   <!-- Claude Code -->
   <div id="cfg-code" class="client-config">
-    <p>Run the following command to add the server to your Claude Code config:</p>
+    <p>Run this command (replace <code>YOUR_RULE_API_KEY</code> with your key):</p>
     <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>claude mcp add rule \
-  --command node \
-  --args "/absolute/path/to/rule-mcp-server/index.js" \
-  --env RULE_API_KEY=your-rule-api-key-here</code></pre>
-    <p>Or edit <code>~/.claude/settings.json</code> manually using the same JSON structure as the Claude Desktop config above.</p>
+  --transport streamable-http \
+  --header "Authorization: Bearer YOUR_RULE_API_KEY" \
+  https://rule-mcp-server-production.up.railway.app/mcp</code></pre>
+    <p>The Rule tools will be available immediately in your next Claude Code session.</p>
   </div>
 
   <!-- Cursor -->
@@ -333,35 +330,23 @@ npm install</code></pre>
     <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>{
   "mcpServers": {
     "rule": {
-      "command": "node",
-      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
-      "env": {
-        "RULE_API_KEY": "your-rule-api-key-here"
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_RULE_API_KEY"
       }
     }
   }
 }</code></pre>
+    <p>Replace <code>YOUR_RULE_API_KEY</code> with your key and save.</p>
   </div>
-
-  <!-- API Key -->
-  <h2><span class="step-num">4</span> Set your API key</h2>
-  <p>Replace <code>your-rule-api-key-here</code> in the config above with your actual Rule API key.</p>
-
-  <div class="callout">
-    <span class="icon">&#9888;</span>
-    <p>Never commit your API key to version control. Use environment variables or a secrets manager instead.</p>
-  </div>
-
-  <p>Alternatively, export the key in your shell and reference it from the config:</p>
-  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>export RULE_API_KEY="your-rule-api-key-here"</code></pre>
 
   <!-- Verify -->
-  <h2><span class="step-num">5</span> Verify the installation</h2>
-  <p>Start the server manually to confirm it runs without errors:</p>
-  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>RULE_API_KEY=your-rule-api-key-here node index.js</code></pre>
-  <p>You should see no output — the server waits for MCP messages over stdio. Press <kbd>Ctrl+C</kbd> to exit.</p>
-  <p>Inside your AI client, ask something like:</p>
+  <h2><span class="step-num">3</span> Verify the connection</h2>
+  <p>Inside your AI client, try asking:</p>
   <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>List my Rule subscribers</code></pre>
+  <p>If the tools are connected you will get a response from your Rule account. You can also check the server status at:</p>
+  <pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code>https://rule-mcp-server-production.up.railway.app/health</code></pre>
 
   <hr />
 
@@ -412,20 +397,20 @@ npm install</code></pre>
       </thead>
       <tbody>
         <tr>
-          <td>Server not found</td>
-          <td>Check that the path in <code>args</code> is absolute and the file exists</td>
-        </tr>
-        <tr>
           <td>401 Unauthorized</td>
-          <td>Verify your <code>RULE_API_KEY</code> is correct and active</td>
-        </tr>
-        <tr>
-          <td>Node not found</td>
-          <td>Ensure Node.js 18+ is installed and <code>node</code> is on your PATH</td>
+          <td>Check that your <code>Authorization: Bearer</code> header contains a valid, active Rule API key</td>
         </tr>
         <tr>
           <td>Tools not appearing</td>
           <td>Restart your MCP client after updating the config file</td>
+        </tr>
+        <tr>
+          <td>Connection refused</td>
+          <td>Verify the server is up at <a href="https://rule-mcp-server-production.up.railway.app/health" target="_blank">rule-mcp-server-production.up.railway.app/health</a></td>
+        </tr>
+        <tr>
+          <td>Wrong transport error</td>
+          <td>Ensure your client uses <code>streamable-http</code> (not stdio) as the transport type</td>
         </tr>
       </tbody>
     </table>

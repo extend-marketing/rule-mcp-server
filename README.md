@@ -17,40 +17,35 @@ A Model Context Protocol (MCP) server for the [Rule](https://rule.io) marketing 
 ## Prerequisites
 
 - A Rule account at [app.rule.io](https://app.rule.io)
-- Rule API key (Settings -> Developer -> New API key)
+- Rule API key (Settings → Developer → New API key)
+- An MCP-compatible client: Claude Desktop, Claude Code, Cursor, or similar
 
 ## Installation
 
-### Option 1: Railway (Recommended for remote/team use)
+The server is hosted at **`https://rule-mcp-server-production.up.railway.app`** — no setup or cloning required. Just point your MCP client at the endpoint and provide your Rule API key.
 
-Deploy the server to Railway so it's accessible as a remote MCP endpoint.
+### Getting Your API Key
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/rule-mcp)
+1. Log in to [app.rule.io](https://app.rule.io)
+2. Go to **Settings → Developer**
+3. Click **New API key**
+4. Copy and save your API key securely
 
-1. Click the "Deploy on Railway" button above
-2. Sign in to [Railway](https://railway.app) (or create an account)
-3. Click **Deploy** — Railway will build and start the server automatically
-4. Once deployed, go to your service's **Settings -> Networking** and generate a public domain (e.g. `rule-mcp-server-production.up.railway.app`)
-5. Your MCP endpoint is now available at: `https://<your-domain>/mcp`
-6. Each user connects with their own Rule API key in the `Authorization` header (see below)
+### Connecting your MCP client
 
-#### Connecting to the Railway-hosted server
-
-Each user provides their own Rule API key via the `Authorization` header. No API key is stored on the server.
-
-**Claude Desktop** (remote MCP server):
+#### Claude Desktop
 
 Add to your `claude_desktop_config.json`:
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "rule": {
       "type": "streamable-http",
-      "url": "https://your-app.up.railway.app/mcp",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_RULE_API_KEY"
       }
@@ -59,60 +54,29 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
-**Claude Code** (CLI):
+Restart Claude Desktop after saving.
+
+#### Claude Code (CLI)
 
 ```bash
-claude mcp add rule --transport streamable-http --header "Authorization: Bearer YOUR_RULE_API_KEY" https://your-app.up.railway.app/mcp
+claude mcp add rule --transport streamable-http --header "Authorization: Bearer YOUR_RULE_API_KEY" https://rule-mcp-server-production.up.railway.app/mcp
 ```
 
-**Cursor / other MCP clients:**
+#### Cursor / other MCP clients
 
-Use the Streamable HTTP transport with the URL `https://your-app.up.railway.app/mcp` and set the header `Authorization: Bearer YOUR_RULE_API_KEY`.
+Use the **Streamable HTTP** transport with:
 
-#### Railway environment variables
+- **URL**: `https://rule-mcp-server-production.up.railway.app/mcp`
+- **Header**: `Authorization: Bearer YOUR_RULE_API_KEY`
 
-| Variable | Required | Description |
-|---|---|---|
-| `PORT` | Auto | Set automatically by Railway |
+### Health check
 
-#### Health check
+Verify the server is running:
 
-The server exposes a `GET /health` endpoint that returns `{"status":"ok"}`. You can use this to verify the deployment is running.
-
-### Option 2: Local installation (stdio)
-
-Run the server locally for direct use with Claude Desktop or other MCP clients.
-
-```bash
-git clone https://github.com/extend-marketing/rule-mcp-server.git
-cd rule-mcp-server
-npm install
 ```
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "rule": {
-      "command": "node",
-      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
-      "env": {
-        "RULE_API_KEY": "your-api-key-here"
-      }
-    }
-  }
-}
+GET https://rule-mcp-server-production.up.railway.app/health
+→ {"status":"ok"}
 ```
-
-Restart Claude Desktop after saving the config.
-
-### Getting Your API Key
-
-1. Log in to [app.rule.io](https://app.rule.io)
-2. Go to **Settings -> Developer**
-3. Click **New API key**
-4. Copy and save your API key securely
 
 ## Available Tools
 
