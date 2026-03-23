@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "rule": {
+      "command": "node",
+      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
+      "env": {
+        "RULE_API_KEY": "your-rule-api-key-here"
+      }
+    }
+  }
+}

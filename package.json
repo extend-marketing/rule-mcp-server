@@ -1,0 +1,31 @@
+{
+  "name": "rule-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Rule API - Marketing automation and email/SMS platform",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "rule-mcp-server": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "rule",
+    "marketing-automation",
+    "email-marketing",
+    "sms-marketing",
+    "crm"
+  ],
+  "author": "Patrick @ Extend Marketing",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.7.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
