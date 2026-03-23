@@ -9,6 +9,9 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
 import { createServer } from 'http';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 // Rule API Client
 class RuleAPIClient {
@@ -1526,6 +1529,14 @@ async function main() {
       if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok' }));
+        return;
+      }
+
+      if (req.url === '/' && req.method === 'GET' && !req.headers['authorization']) {
+        const __dirname = dirname(fileURLToPath(import.meta.url));
+        const html = readFileSync(join(__dirname, 'index.html'), 'utf-8');
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
         return;
       }
 
