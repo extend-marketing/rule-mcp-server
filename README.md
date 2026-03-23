@@ -29,12 +29,14 @@ Deploy the server to Railway so it's accessible as a remote MCP endpoint.
 
 1. Click the "Deploy on Railway" button above
 2. Sign in to [Railway](https://railway.app) (or create an account)
-3. Set the `RULE_API_KEY` environment variable to your Rule API key
-4. Click **Deploy** — Railway will build and start the server automatically
-5. Once deployed, go to your service's **Settings -> Networking** and generate a public domain (e.g. `rule-mcp-server-production.up.railway.app`)
-6. Your MCP endpoint is now available at: `https://<your-domain>/mcp`
+3. Click **Deploy** — Railway will build and start the server automatically
+4. Once deployed, go to your service's **Settings -> Networking** and generate a public domain (e.g. `rule-mcp-server-production.up.railway.app`)
+5. Your MCP endpoint is now available at: `https://<your-domain>/mcp`
+6. Each user connects with their own Rule API key in the `Authorization` header (see below)
 
 #### Connecting to the Railway-hosted server
+
+Each user provides their own Rule API key via the `Authorization` header. No API key is stored on the server.
 
 **Claude Desktop** (remote MCP server):
 
@@ -48,7 +50,10 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "rule": {
       "type": "streamable-http",
-      "url": "https://your-app.up.railway.app/mcp"
+      "url": "https://your-app.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_RULE_API_KEY"
+      }
     }
   }
 }
@@ -57,18 +62,17 @@ Add to your `claude_desktop_config.json`:
 **Claude Code** (CLI):
 
 ```bash
-claude mcp add rule --transport streamable-http https://your-app.up.railway.app/mcp
+claude mcp add rule --transport streamable-http --header "Authorization: Bearer YOUR_RULE_API_KEY" https://your-app.up.railway.app/mcp
 ```
 
 **Cursor / other MCP clients:**
 
-Use the Streamable HTTP transport with the URL `https://your-app.up.railway.app/mcp`.
+Use the Streamable HTTP transport with the URL `https://your-app.up.railway.app/mcp` and set the header `Authorization: Bearer YOUR_RULE_API_KEY`.
 
 #### Railway environment variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `RULE_API_KEY` | Yes | Your Rule API key |
 | `PORT` | Auto | Set automatically by Railway |
 
 #### Health check
@@ -80,7 +84,7 @@ The server exposes a `GET /health` endpoint that returns `{"status":"ok"}`. You 
 Run the server locally for direct use with Claude Desktop or other MCP clients.
 
 ```bash
-git clone https://github.com/your-username/rule-mcp-server.git
+git clone https://github.com/extend-marketing/rule-mcp-server.git
 cd rule-mcp-server
 npm install
 ```

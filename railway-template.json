@@ -1,7 +1,7 @@
 {
   "name": "Rule MCP Server",
   "description": "MCP server for Rule marketing automation - manage subscribers, campaigns, transactional messages and more via AI assistants",
-  "repository": "https://github.com/your-username/rule-mcp-server",
+  "repository": "https://github.com/extend-marketing/rule-mcp-server",
   "keywords": [
     "mcp",
     "rule",
@@ -12,7 +12,7 @@
     "claude",
     "ai"
   ],
-  "documentation": "https://github.com/your-username/rule-mcp-server#readme",
+  "documentation": "https://github.com/extend-marketing/rule-mcp-server#readme",
   "categories": [
     "automation",
     "marketing",
@@ -23,13 +23,7 @@
       "name": "rule-mcp-server",
       "source": {
         "type": "github",
-        "repo": "your-username/rule-mcp-server"
-      },
-      "env": {
-        "RULE_API_KEY": {
-          "description": "Your Rule API key from app.rule.io -> Settings -> Developer",
-          "required": true
-        }
+        "repo": "extend-marketing/rule-mcp-server"
       }
     }
   ]

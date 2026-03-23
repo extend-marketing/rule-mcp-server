@@ -237,25 +237,16 @@ class RuleAPIClient {
 }
 
 // MCP Server Setup
-// Get API key from environment
-const API_KEY = process.env.RULE_API_KEY;
-if (!API_KEY) {
-  console.error('Error: RULE_API_KEY environment variable is required');
-  process.exit(1);
-}
-
-const ruleClient = new RuleAPIClient(API_KEY);
-
-function createMCPServer() {
+function createMCPServer(ruleClient) {
   const server = new Server(
     { name: 'rule-mcp-server', version: '1.0.0' },
     { capabilities: { tools: {} } }
   );
-  setupHandlers(server);
+  setupHandlers(server, ruleClient);
   return server;
 }
 
-function setupHandlers(server) {
+function setupHandlers(server, ruleClient) {
 
 // Tool definitions
 server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -1539,8 +1530,16 @@ async function main() {
       }
 
       if (req.url === '/mcp' || req.url === '/') {
+        const authHeader = req.headers['authorization'] || '';
+        const apiKey = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+        if (!apiKey) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Missing Authorization header. Use: Authorization: Bearer <RULE_API_KEY>' }));
+          return;
+        }
+        const ruleClient = new RuleAPIClient(apiKey);
         const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
-        const mcpServer = createMCPServer();
+        const mcpServer = createMCPServer(ruleClient);
         res.on('close', () => {
           transport.close();
         });
@@ -1558,7 +1557,13 @@ async function main() {
     });
   } else {
     // Stdio mode for local usage
-    const mcpServer = createMCPServer();
+    const apiKey = process.env.RULE_API_KEY;
+    if (!apiKey) {
+      console.error('Error: RULE_API_KEY environment variable is required');
+      process.exit(1);
+    }
+    const ruleClient = new RuleAPIClient(apiKey);
+    const mcpServer = createMCPServer(ruleClient);
     const transport = new StdioServerTransport();
     await mcpServer.connect(transport);
     console.error('Rule MCP Server running on stdio');
