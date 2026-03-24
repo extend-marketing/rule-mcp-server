@@ -1519,6 +1519,99 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 } // end setupHandlers
 
+function normalizeNamedApiKeys(input) {
+  if (!input) return [];
+
+  if (typeof input === 'object' && !Array.isArray(input)) {
+    return Object.entries(input).flatMap(([name, value]) => {
+      if (typeof value === 'string') {
+        return [{ name, key: value }];
+      }
+
+      if (value && typeof value === 'object') {
+        const key = value.key || value.apiKey || value.api_key;
+        const label = value.label || value.name || name;
+        return key ? [{ name: label, key }] : [];
+      }
+
+      return [];
+    });
+  }
+
+  if (Array.isArray(input)) {
+    return input.flatMap((entry) => {
+      if (typeof entry === 'string') {
+        const [name, ...keyParts] = entry.split('=');
+        const key = keyParts.join('=').trim();
+        return name && key ? [{ name: name.trim(), key }] : [];
+      }
+
+      if (entry && typeof entry === 'object') {
+        const name = entry.label || entry.name;
+        const key = entry.key || entry.apiKey || entry.api_key;
+        return name && key ? [{ name: String(name).trim(), key: String(key).trim() }] : [];
+      }
+
+      return [];
+    });
+  }
+
+  return [];
+}
+
+function parseNamedApiKeys(rawValue) {
+  if (!rawValue) return [];
+
+  const trimmed = rawValue.trim();
+  if (!trimmed) return [];
+
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    return normalizeNamedApiKeys(JSON.parse(trimmed));
+  }
+
+  return trimmed
+    .split(/\r?\n|;/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .flatMap((entry) => {
+      const separator = entry.includes('=') ? '=' : entry.includes(':') ? ':' : null;
+      if (!separator) return [];
+
+      const [name, ...keyParts] = entry.split(separator);
+      const key = keyParts.join(separator).trim();
+      return name && key ? [{ name: name.trim(), key }] : [];
+    });
+}
+
+function resolveApiKeyFromEnv(env) {
+  const namedKeys = parseNamedApiKeys(env.RULE_API_KEYS || env.RULE_API_KEYS_JSON);
+  const selectedName = env.RULE_API_KEY_NAME || env.RULE_API_KEY_LABEL || env.RULE_PROFILE;
+  const directApiKey = env.RULE_API_KEY;
+
+  if (selectedName) {
+    const selected = namedKeys.find(({ name }) => name === selectedName);
+    if (!selected) {
+      const available = namedKeys.map(({ name }) => name).join(', ') || 'none';
+      throw new Error(
+        `RULE_API_KEY_NAME "${selectedName}" was not found. Available names: ${available}`
+      );
+    }
+    return selected.key;
+  }
+
+  if (directApiKey) {
+    return directApiKey;
+  }
+
+  if (namedKeys.length > 0) {
+    return namedKeys[0].key;
+  }
+
+  throw new Error(
+    'RULE_API_KEY or RULE_API_KEYS environment variable is required'
+  );
+}
+
 // Start the server
 async function main() {
   const port = process.env.PORT;
@@ -1568,9 +1661,11 @@ async function main() {
     });
   } else {
     // Stdio mode for local usage
-    const apiKey = process.env.RULE_API_KEY;
-    if (!apiKey) {
-      console.error('Error: RULE_API_KEY environment variable is required');
+    let apiKey;
+    try {
+      apiKey = resolveApiKeyFromEnv(process.env);
+    } catch (error) {
+      console.error(`Error: ${error.message}`);
       process.exit(1);
     }
     const ruleClient = new RuleAPIClient(apiKey);

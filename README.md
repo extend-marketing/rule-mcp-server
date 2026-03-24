@@ -22,7 +22,21 @@ A Model Context Protocol (MCP) server for the [Rule](https://rule.io) marketing 
 
 ## Installation
 
-The server is hosted at **`https://rule-mcp-server-production.up.railway.app`** — no setup or cloning required. Just point your MCP client at the endpoint and provide your Rule API key.
+You have two easy ways to run this server:
+
+### Option A: Hosted HTTP server
+
+The server is hosted at **`https://rule-mcp-server-production.up.railway.app`**. This is the fastest way to get started because there is no setup or cloning required. Just point your MCP client at the endpoint and provide your Rule API key.
+
+### Option B: Portable local install with `npx`
+
+If you prefer to run the server locally, you do not need to clone this repo or hardcode a path. Any computer with Node.js 18+ can run it with:
+
+```bash
+npx -y rule-mcp-server
+```
+
+This works well for Claude Desktop, Claude Code, and other MCP clients that launch local commands.
 
 ### Getting Your API Key
 
@@ -56,6 +70,24 @@ Add to your `claude_desktop_config.json`:
 
 Restart Claude Desktop after saving.
 
+#### Claude Desktop with local `npx`
+
+```json
+{
+  "mcpServers": {
+    "rule": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEY": "YOUR_RULE_API_KEY"
+      }
+    }
+  }
+}
+```
+
+This is the easiest local setup because it works on any computer without changing file paths.
+
 #### Claude Code (CLI)
 
 ```bash
@@ -69,9 +101,71 @@ Use the **Streamable HTTP** transport with:
 - **URL**: `https://rule-mcp-server-production.up.railway.app/mcp`
 - **Header**: `Authorization: Bearer YOUR_RULE_API_KEY`
 
+### Using multiple Rule API keys
+
+Many teams have more than one Rule account or key, such as `Production`, `Staging`, or `Client A`.
+
+#### Hosted HTTP clients
+
+Add multiple MCP server entries, one per key:
+
+```json
+{
+  "mcpServers": {
+    "rule-production": {
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer RULE_PRODUCTION_KEY"
+      }
+    },
+    "rule-staging": {
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer RULE_STAGING_KEY"
+      }
+    }
+  }
+}
+```
+
+#### Local `npx` clients
+
+The server now supports a shared `RULE_API_KEYS` list plus a selected label via `RULE_API_KEY_NAME`.
+
+```json
+{
+  "mcpServers": {
+    "rule-production": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEYS": "{\"Production\":\"RULE_PRODUCTION_KEY\",\"Staging\":\"RULE_STAGING_KEY\"}",
+        "RULE_API_KEY_NAME": "Production"
+      }
+    },
+    "rule-staging": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEYS": "{\"Production\":\"RULE_PRODUCTION_KEY\",\"Staging\":\"RULE_STAGING_KEY\"}",
+        "RULE_API_KEY_NAME": "Staging"
+      }
+    }
+  }
+}
+```
+
+Supported formats for `RULE_API_KEYS`:
+
+- JSON object: `{"Production":"key_1","Staging":"key_2"}`
+- JSON array: `[{"name":"Production","key":"key_1"},{"name":"Staging","key":"key_2"}]`
+- Plain text: `Production=key_1;Staging=key_2`
+
 ### Health check
 
-Verify the server is running:
+Verify the hosted server is running:
 
 ```
 GET https://rule-mcp-server-production.up.railway.app/health

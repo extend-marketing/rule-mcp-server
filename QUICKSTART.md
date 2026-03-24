@@ -5,7 +5,45 @@
 - Rule API key (get from Settings -> Developer)
 - For local install: Node.js 18 or higher
 
-## Option A: Deploy to Railway (Fastest)
+## Option A: Use the hosted server (Fastest)
+
+No install is required. Add this to your MCP client:
+
+```json
+{
+  "mcpServers": {
+    "rule": {
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer your-rule-api-key-here"
+      }
+    }
+  }
+}
+```
+
+Restart your MCP client after saving.
+
+## Option B: Local install with `npx` (Most portable)
+
+This works on any computer without cloning the repo or pointing to a local file path.
+
+```json
+{
+  "mcpServers": {
+    "rule": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEY": "your-rule-api-key-here"
+      }
+    }
+  }
+}
+```
+
+## Option C: Deploy to Railway
 
 1. Click the deploy button in the [README](README.md#option-1-railway-recommended-for-remoteteam-use)
 2. Set your `RULE_API_KEY` environment variable
@@ -25,15 +63,36 @@
 
 5. Restart Claude Desktop
 
-## Option B: Local Installation
+## Multiple named API keys
 
-### 1. Install Dependencies
-```bash
-cd rule-mcp-server
-npm install
+If you switch between several Rule accounts, create multiple MCP entries with clear labels.
+
+### Hosted example
+
+```json
+{
+  "mcpServers": {
+    "rule-production": {
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer RULE_PRODUCTION_KEY"
+      }
+    },
+    "rule-sandbox": {
+      "type": "streamable-http",
+      "url": "https://rule-mcp-server-production.up.railway.app/mcp",
+      "headers": {
+        "Authorization": "Bearer RULE_SANDBOX_KEY"
+      }
+    }
+  }
+}
 ```
 
-### 2. Configure Claude Desktop
+### Local `npx` example
+
+The server supports a shared `RULE_API_KEYS` list and selects one with `RULE_API_KEY_NAME`.
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -41,18 +100,27 @@ npm install
 ```json
 {
   "mcpServers": {
-    "rule": {
-      "command": "node",
-      "args": ["/full/path/to/rule-mcp-server/index.js"],
+    "rule-production": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
       "env": {
-        "RULE_API_KEY": "your-rule-api-key-here"
+        "RULE_API_KEYS": "{\"Production\":\"RULE_PRODUCTION_KEY\",\"Sandbox\":\"RULE_SANDBOX_KEY\"}",
+        "RULE_API_KEY_NAME": "Production"
+      }
+    },
+    "rule-sandbox": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEYS": "{\"Production\":\"RULE_PRODUCTION_KEY\",\"Sandbox\":\"RULE_SANDBOX_KEY\"}",
+        "RULE_API_KEY_NAME": "Sandbox"
       }
     }
   }
 }
 ```
 
-### 3. Restart Claude Desktop
+### Restart your MCP client
 
 After saving the config file, restart Claude Desktop completely.
 
@@ -99,7 +167,7 @@ List all segments in my Rule account
 
 ### "RULE_API_KEY environment variable is required"
 - Make sure your API key is set in the config file
-- Verify the path to index.js is correct
+- For multiple keys, verify `RULE_API_KEY_NAME` matches one of the labels in `RULE_API_KEYS`
 - Restart Claude Desktop after changes
 
 ### "Rule API Error: NotAuthorized"
@@ -108,12 +176,11 @@ List all segments in my Rule account
 - Generate a new API key if needed
 
 ### "Cannot find module"
-- Run `npm install` in the rule-mcp-server directory
 - Make sure Node.js 18+ is installed
+- If using `npx`, try `npx -y rule-mcp-server` manually in your terminal first
 
 ### Server not appearing in Claude
 - Check JSON syntax in claude_desktop_config.json
-- Verify the absolute path to index.js
 - Look for errors in Claude Desktop logs
 
 ## Next Steps

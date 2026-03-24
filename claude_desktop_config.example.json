@@ -1,10 +1,26 @@
 {
   "mcpServers": {
     "rule": {
-      "command": "node",
-      "args": ["/absolute/path/to/rule-mcp-server/index.js"],
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
       "env": {
         "RULE_API_KEY": "your-rule-api-key-here"
+      }
+    },
+    "rule-production": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEYS": "{\"Production\":\"your-production-key\",\"Sandbox\":\"your-sandbox-key\"}",
+        "RULE_API_KEY_NAME": "Production"
+      }
+    },
+    "rule-sandbox": {
+      "command": "npx",
+      "args": ["-y", "rule-mcp-server"],
+      "env": {
+        "RULE_API_KEYS": "{\"Production\":\"your-production-key\",\"Sandbox\":\"your-sandbox-key\"}",
+        "RULE_API_KEY_NAME": "Sandbox"
       }
     }
   }
